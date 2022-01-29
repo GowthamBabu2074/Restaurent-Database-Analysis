@@ -1,0 +1,77 @@
+---
+title: "pr2"
+output: html_document
+---
+
+```{r}
+#df = read_csv('orders.csv')
+df = orders
+```
+
+
+
+```{r}
+library(dplyr)
+df$Order_Date = as.Date(df$Order_Date)
+df$month = substr(df$Order_Date, 6,7)
+a = df%>%
+  group_by(month)%>%
+  summarise(total_orders = sum(Quantity))%>%
+  arrange(month)
+a
+```
+
+```{r}
+library(ggplot2)
+
+ggplot(data=a, aes(x=month, y=total_orders, group=1)) +
+  geom_line()+
+  geom_point()
+```
+
+```{r}
+#menu = read.csv('menu.csv')
+df2 = df
+df2 = df2%>%
+  group_by(Item_Name)%>%
+  summarise(total_orders = sum(Quantity))%>%
+  arrange(desc(total_orders))
+
+df2
+```
+
+```{r}
+df2 = df
+df2 = df2[df2$Item_Name != 'Plain Papadum', ]  
+df2 = df2[df2$Item_Name != 'Pilau Rice', ] 
+df2 = df2[df2$Item_Name != 'Naan', ] 
+
+
+#df2 =df
+df2$month = as.numeric(df2$month)
+
+a = c(05, 06, 07, 08, 09, 10, 11, 12)
+df4 = data.frame()
+for (i in a){
+  
+   df3 = df2[df2$month == i, ]
+   df3 = df3%>%
+      group_by(Item_Name)%>%
+      summarise(total_orders = sum(Quantity))%>%
+      arrange(desc(total_orders))
+    
+    df3 = head(df3, 1)
+    
+    df3 = data.frame(df3)
+    df4 = rbind(df4, df3)
+}
+
+df4$month = seq(5, 12)
+df4
+```
+
+```{r}
+ggplot(df4, aes(x = month, y = total_orders, color = Item_Name))+
+  geom_bar(stat="identity", fill = 'White') + theme_light() 
+```
+
